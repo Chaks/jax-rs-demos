@@ -30,12 +30,13 @@ public class FriendResource {
 
   @Inject
   CouchbaseClientService couchbaseClientService;
+  @Inject
+  Gson gson;
 
   @GET
   @Path("friend/{id}")
   @Produces(MediaType.APPLICATION_JSON)
   public Friend getFriend(@PathParam("id") String id) {
-    Gson gson = new Gson();
     String jsonString = (String) couchbaseClientService.getCouchbaseClient().get(id);
     return gson.fromJson(jsonString, Friend.class);
   }
@@ -51,7 +52,6 @@ public class FriendResource {
     Query query = new Query();
     query.setIncludeDocs(true);
 
-    Gson gson = new Gson();
     ViewResponse results = couchbaseClientService.getCouchbaseClient().query(view, query);
     for (ViewRow row : results) {
       friends.add(gson.fromJson(row.getDocument().toString(), Friend.class));
@@ -63,13 +63,12 @@ public class FriendResource {
   @POST
   @Path("friend")
   @Consumes(MediaType.APPLICATION_JSON)
-  //@Produces(MediaType.TEXT_HTML)
+  //@Produces(MediaType.TEXT_PLAIN)
   public void addFriend(Friend friend) {
-    Gson gson = new Gson();
     String jsonString = gson.toJson(friend);
     couchbaseClientService.getCouchbaseClient().set(friend.getId() + "", 0, jsonString);
 
-    //ResponseBuilder responseBuilder = Response.ok("Successfully added new friend", MediaType.TEXT_HTML);
+    //ResponseBuilder responseBuilder = Response.ok("Successfully added new friend", MediaType.TEXT_PLAIN);
     //return responseBuilder.build();
   }
 }
